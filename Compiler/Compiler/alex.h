@@ -1,5 +1,6 @@
 #include "compiler.h"
 
+
 Token *addTk(int code)
 {
 	Token *tk;

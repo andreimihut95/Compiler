@@ -9,7 +9,7 @@
 #include<sys/types.h>
 
 #define SAFEALLOC(var,Type) if((var=(Type*)malloc(sizeof(Type)))==NULL)err("not enough memory");
-typedef enum {
+ enum {
 	INT = 0, CHAR = 1, FLOAT = 2, DOUBLE = 3, ENUM = 4, IF = 5, ELSE = 6, BREAK = 7, FOR = 8, STRUCT = 9, VOID = 10,
 	WHILE = 11, RETURN = 12, DO = 13, CONTINUE = 14, SWITCH = 15, CASE = 16, LONG = 17, ID = 18, CT_INT = 19, CT_REAL = 20, CT_CHAR = 21,
 	CT_STRING = 22, COMMA = 23, SEMICOLON = 24, LPAR = 25, RPAR = 26, LBRACKET = 27, RBRACKET = 28, LACC = 29,

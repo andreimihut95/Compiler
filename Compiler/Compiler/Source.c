@@ -3,7 +3,7 @@
 int main()
 {
 	int n = 0; char c;
-	f = fopen("8.txt", "r");
+	f = fopen("1.txt", "r");
 	if (f == NULL)
 		err("Eroare la fisier!");
 	while ((c = fgetc(f)) != EOF)
