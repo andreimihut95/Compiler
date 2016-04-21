@@ -1,4 +1,7 @@
+#ifndef _ALEX_
+#define _ALEX_
 #include "compiler.h"
+
 Token *addTk(int code)
 {
 	Token *tk;
@@ -755,3 +758,4 @@ void terminare()
 	free(lastToken);
 	free(tokens);
 }
+#endif

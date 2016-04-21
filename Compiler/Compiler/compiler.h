@@ -1,3 +1,5 @@
+#ifndef _COMPILER_
+#define _COMPILER
 #include<fcntl.h>
 #include<stdio.h>
 #include<stdlib.h>
@@ -36,7 +38,7 @@ typedef struct _Token
 	struct _Token *next; // inlantuire la urmatorul AL
 }Token;
 
-Token *lastToken, *tokens;//poiners inceput , final
+Token *lastToken, *tokens , *consumedToken , *currentToken;//poiners inceput , final
 
 void err(const char *fmt, ...)
 {
@@ -59,3 +61,4 @@ void tkerr(const Token *tk, const char *fmt, ...)
 	va_end(va);
 	exit(-1);
 }
+#endif

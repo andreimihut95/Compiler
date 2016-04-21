@@ -1,4 +1,5 @@
 #include "alex.h"
+#include "asin.h"
 
 int main()
 {
