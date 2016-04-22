@@ -1,5 +1,5 @@
 #ifndef _COMPILER_
-#define _COMPILER
+#define _COMPILER_
 #include<fcntl.h>
 #include<stdio.h>
 #include<stdlib.h>
