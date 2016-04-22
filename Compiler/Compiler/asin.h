@@ -403,7 +403,6 @@ int expr()
 
 int exprAssign()
 {
-	Token *startToken = currentToken;
 	if (exprUnary())
 	{
 		if (consume(ASSIGN))
@@ -420,7 +419,6 @@ int exprAssign()
 	{
 		return 1;
 	}
-	currentToken = startToken;
 	return 0;
 }
 
@@ -428,16 +426,15 @@ int exprOr()
 {
 	if (exprAnd())
 	{
-		if (exprOr1())
-		{
-			return 1;
-		}
+		exprOr1();
+		return 1;
 	}
 	return 0;
 }
 
 int exprOr1()
 {
+	Token *startToken = currentToken;
 	if (consume(OR))
 	{
 		if (exprAnd())
@@ -452,23 +449,23 @@ int exprOr1()
 		else
 			tkerr(currentToken, "Missing exprand\n");
 	}
-	return 1;
+	currentToken = startToken;
+	return 0;
 }
 
 int exprAnd()
 {
 	if (exprEq())
 	{
-		if (exprAnd1())
-		{
-			return 1;
-		}
+		exprAnd1();
+		return 1;
 	}
 	return 0;
 }
 
 int exprAnd1()
 {
+	Token *startToken = currentToken;
 	if (consume(AND))
 	{
 		if (exprEq())
@@ -483,20 +480,24 @@ int exprAnd1()
 		else
 			tkerr(currentToken, "Missing exprEq\n");
 	}
-	return 1;
+	currentToken = startToken;
+	return 0;
 }
 
 
 int exprEq()
 {
 	if (exprRel())
-		if (exprEq1())
-			return 1;
+	{
+		exprEq1();
+		return 1;
+	}
 	return 0;
 }
 
 int exprEq1()
 {
+	Token *startToken = currentToken;
 	if (consume(EQUAL) || consume(NOTEQ))
 	{
 		if (exprRel())
@@ -508,20 +509,24 @@ int exprEq1()
 		}
 		else tkerr(currentToken, "Incomplete Equal expression");
 	}
-	return 1;
+	currentToken = startToken;
+	return 0;
 
 }
 
 int exprRel()
 {
 	if (exprAdd())
-		if (exprRel1())
-			return 1;
+	{
+		exprRel1();
+		return 1;
+	}
 	return 0;
 }
 
 int exprRel1()
 {
+	Token *startToken = currentToken;
 	if (consume(LESS) || consume(LESSEQ) || consume(GREATER) || consume(GREATEREQ))
 	{
 		if (exprAdd())
@@ -534,19 +539,23 @@ int exprRel1()
 		else
 			tkerr(currentToken, "Incomplete Rel expression");
 	}
-	return 1;
+	currentToken = startToken;
+	return 0;
 }
 
 int exprAdd()
 {
 	if (exprMul())
-		if (exprAdd1())
-			return 1;
+	{
+		exprAdd1();
+		return 1;
+	}
 	return 0;
 }
 
 int exprAdd1()
 {
+	Token *startToken = currentToken;
 	if (consume(ADD) || consume(SUB))
 	{
 		if (exprMul())
@@ -558,19 +567,23 @@ int exprAdd1()
 		}
 		else tkerr(currentToken, "Incomplete Add expression\n");
 	}
-	return 1;
+	currentToken = startToken;
+	return 0;
 }
 
 int exprMul()
 {
 	if (exprCast())
-		if (exprMul1())
-			return 1;
+	{
+		exprMul1();
+		return 1;
+	}
 	return 0;
 }
 
 int exprMul1()
 {
+	Token *startToken = currentToken;
 	if (consume(MUL) || consume(DIV))
 	{
 		if (exprCast())
@@ -581,7 +594,8 @@ int exprMul1()
 		}
 		else tkerr(currentToken, "Incomplete Mul expression");
 	}
-	return 1;
+	currentToken = startToken;
+	return 0;
 }
 
 int exprCast()
@@ -633,13 +647,16 @@ int exprUnary()
 int exprPostfix()
 {
 	if (exprPrimary())
-		if (exprPostfix1())
-			return 1;
+	{
+		exprPostfix1();
+		return 1;
+	}
 	return 0;
 }
 
 int exprPostfix1()
 {
+	Token *startToken = currentToken;
 	if (consume(LBRACKET))
 	{
 		if (expr())
@@ -673,7 +690,8 @@ int exprPostfix1()
 		else
 			tkerr(currentToken, "Missing ID\n");
 	}
-	return 1;
+	currentToken = startToken;
+	return 0;
 }
 
 int exprPrimary()
@@ -708,6 +726,7 @@ int exprPrimary()
 		}
 		return 1;
 	}
+
 	if (consume(CT_INT) || consume(CT_REAL) || consume(CT_CHAR) || consume(CT_STRING))
 	{
 		return 1;
@@ -723,6 +742,7 @@ int exprPrimary()
 			else
 				tkerr(currentToken, "RPAR is expected");
 		}
+		tkerr(currentToken, "Expression is missing\n");
 	}
 	currentToken = startToken;
 	return 0;
