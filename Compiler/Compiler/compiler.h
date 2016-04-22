@@ -38,7 +38,7 @@ typedef struct _Token
 	struct _Token *next; // inlantuire la urmatorul AL
 }Token;
 
-Token *lastToken, *tokens , *consumedToken , *currentToken;//poiners inceput , final
+Token *lastToken = NULL, *tokens=NULL , *consumedToken=NULL , *currentToken=NULL;//poiners inceput , final
 
 void err(const char *fmt, ...)
 {

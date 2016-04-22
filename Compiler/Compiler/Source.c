@@ -16,7 +16,7 @@ int main()
 	while (lastToken->code != END);
 	showAtoms();
 	currentToken = tokens;
-	declStruct();
-	terminare();
+	unit();
+	//terminare();
 	return 0;
 }

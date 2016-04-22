@@ -16,24 +16,24 @@ int unit()
 {
 	while (1)
 	{
-		if (declStruct()) {}
-		else if (declFunc()) {}
+		if (declStruct()) 
+		{}
+		else if (declFunc())
+		{}
+		else if (declVar()) 
+		{}
 		else
-			if (declVar()) {}
-			else
-				break;
-
+			break;
 	}
 	if (consume(END))
 		return 1;
-	tkerr(currentToken, "Syntax error\n");
+	tkerr(currentToken, "Syntax error \n");
 }
 
 int declStruct()
 {
 
 	Token *startToken = currentToken;
-	printf("Am intrat pe declStruct\n");
 	if (consume(STRUCT))
 	{
 		if (consume(ID))
@@ -48,7 +48,6 @@ int declStruct()
 				if (consume(RACC)) {
 					if (consume(SEMICOLON))
 					{
-						printf("Succeeeees declStruct\n");
 						return 1;
 					}
 					else
@@ -208,6 +207,7 @@ int declFuncHeader()
 
 int declFunc()
 {
+	printf("Am intrat pe declFunc!\n");
 	if (typeBase())
 	{
 		consume(MUL);
