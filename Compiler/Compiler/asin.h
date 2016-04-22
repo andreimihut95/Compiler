@@ -224,7 +224,6 @@ int declFunc()
 
 int funcArg()
 {
-	Token *startToken = currentToken;
 	if (typeBase())
 	{
 		if (consume(ID))
@@ -234,33 +233,31 @@ int funcArg()
 		}
 		else tkerr(currentToken, "Missing Id\n");
 	}
-	currentToken = startToken;
 	return 0;
 
 }
 
 int stmCompound()
 {
-
-	if (!consume(LACC))
-		return 0;
-	while (1)
-	{
-		if (declVar())
+	Token *startToken = currentToken;
+	if (consume(LACC))
+	{ 
+		while (1)
 		{
-
-		}
-		else
-			if (stm())
-			{
-
-			}
+			if (declVar())
+			{}
+			else if (stm())
+			{}
 			else
 				break;
+		}
+		if (consume(RACC))
+			return 1;
+		else
+			tkerr(currentToken, "Missing }");
 	}
-	if (!consume(RACC))
-		tkerr(currentToken, "misssing } or syntax error");
-	return 1;
+	currentToken = startToken;
+	return 0;
 
 }
 
@@ -322,7 +319,10 @@ int stm()
 			else
 				tkerr(currentToken, "Missing expression after (\n");
 		}
+		else
+			tkerr(currentToken, "Missing (\n");
 	}
+
 	if (consume(FOR))
 	{
 		if (consume(LPAR))
@@ -340,6 +340,8 @@ int stm()
 						{
 							return 1;
 						}
+						else
+							tkerr(currentToken, "Missing stm\n");
 					}
 					else
 						tkerr(currentToken, "Missing ) after expression\n");
@@ -362,7 +364,6 @@ int stm()
 		}
 		else
 			tkerr(currentToken, "Missing ; after break\n");
-
 	}
 
 	if (consume(RETURN))
@@ -385,12 +386,12 @@ int stm()
 		else
 			tkerr(currentToken, "Missing ; after expression\n");
 	}
+
 	if (consume(SEMICOLON))
 		return 1;
 	currentToken = startToken;
 	return 0;
 }
-
 
 
 int expr()
