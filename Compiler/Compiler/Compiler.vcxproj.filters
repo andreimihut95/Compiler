@@ -28,5 +28,11 @@
     <Text Include="fisier.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="9.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="8.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
