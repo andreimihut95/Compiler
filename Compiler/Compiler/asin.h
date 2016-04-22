@@ -69,7 +69,6 @@ int declStruct()
 int declVar()
 {
 	Token *startToken = currentToken;
-	printf("Am intrat pe declVar\n");
 	if (typeBase())
 	{
 		if (consume(ID))
@@ -90,7 +89,6 @@ int declVar()
 			}
 			if (consume(SEMICOLON))
 			{
-				printf("Succes declVar\n");
 				return 1;
 			}
 			else
@@ -107,7 +105,6 @@ int typeBase()
 {
 
 	Token *startToken = currentToken;
-	printf("Am intrat pe typebaase\n");
 	if (consume(INT))
 	{
 		return 1;
@@ -135,14 +132,12 @@ int typeBase()
 
 int arrayDecl()
 {
-	printf("Am intrat pe arraydecl\n");
 	Token *startToken = currentToken;
 	if (consume(LBRACKET))
 	{
 		expr();
 		if (consume(RBRACKET))
 		{
-			printf("Succes arrayDecl\n");
 			return 1;
 		}
 		else
@@ -165,60 +160,66 @@ int typeName()
 
 int declFuncHeader()
 {
-	if (consume(ID) == 0)
+	if (consume(ID))
 	{
-		tkerr(currentToken, "Incomplete DeclFunc declaration, Id expected");
-		return 0;
-	}
-	if (consume(LPAR) == 0)
-	{
-		tkerr(currentToken, "Incomplete DeclFunc declaration, Lpar expected");
-		return 0;
-	}
-	if (funcArg())
-	{
-		while (1)
+		if (consume(LPAR))
 		{
-			if (consume(COMMA))
+			if (funcArg())
 			{
-				if (funcArg())
+				while (1)
+				{
+					if (consume(COMMA))
+					{
+						if (funcArg())
+						{
+						}
+						else
+							tkerr(currentToken, "Invalid declaration!\n");
+					}
+					else
+						break;
+				}
+			}
+			if (consume(RPAR))
+			{
+				if (stmCompound())
 				{
 					return 1;
 				}
 				else
-					tkerr(currentToken, "Invalid declaration!\n");
+					tkerr(currentToken, "Missing stmCompound\n");
 			}
 			else
-				break;
+				tkerr(currentToken, "Missing )\n");
 		}
+		else
+			tkerr(currentToken, "Mising ( \n");
 	}
-	if (consume(RPAR) == 0)
-	{
-		tkerr(currentToken, "Incomplete DeclFunc declaration, RPAR expected");
-		return 0;
-	}
-	if (stmCompound() == 0)
-	{
-		tkerr(currentToken, "Incomplete DeclFunc declaration, StmCompound expected");
-		return 0;
-	}
-	return 1;
+	else
+		tkerr(currentToken, "Missing ID");
+
 }
 
 int declFunc()
 {
-	printf("Am intrat pe declFunc!\n");
+	Token *startToken = currentToken;
 	if (typeBase())
 	{
 		consume(MUL);
 		if (declFuncHeader())
+		{
 			return 1;
+		}
 	}
 	if (consume(VOID))
+	{
 		if (declFuncHeader())
+		{
 			return 1;
+		}
+	}
+	currentToken = startToken;
 	return 0;
-
 }
 
 int funcArg()
@@ -395,9 +396,7 @@ int stm()
 int expr()
 {
 	if (exprAssign())
-	{
 		return 1;
-	}
 	return 0;
 }
 
