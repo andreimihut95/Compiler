@@ -4,7 +4,7 @@
 int main()
 {
 	int n = 0; char c;
-	f = fopen("8.txt", "r");
+	f = fopen("fisier.txt", "r");
 	if (f == NULL)
 		err("Eroare la fisier!");
 	while ((c = fgetc(f)) != EOF)
@@ -15,7 +15,8 @@ int main()
 		getNextToken();
 	while (lastToken->code != END);
 	showAtoms();
-	unit();
+	currentToken = tokens;
+	declStruct();
 	terminare();
 	return 0;
 }
