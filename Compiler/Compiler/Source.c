@@ -17,6 +17,6 @@ int main()
 	showAtoms();
 	currentToken = tokens;
 	unit();
-	//terminare();
+	terminare();
 	return 0;
 }

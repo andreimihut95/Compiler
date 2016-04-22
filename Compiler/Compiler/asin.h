@@ -57,7 +57,10 @@ int declStruct()
 					tkerr(currentToken, "missing }\n");
 			}
 			else
-				tkerr(currentToken, "missing {");
+			{
+				currentToken = startToken;
+				return 0;
+			}
 		}
 		else
 			tkerr(currentToken, "missing ID");
@@ -160,6 +163,8 @@ int typeName()
 
 int declFuncHeader()
 {
+	Token *startToken = currentToken;
+
 	if (consume(ID))
 	{
 		if (consume(LPAR))
@@ -193,7 +198,10 @@ int declFuncHeader()
 				tkerr(currentToken, "Missing )\n");
 		}
 		else
-			tkerr(currentToken, "Mising ( \n");
+		{
+			currentToken = startToken;
+			return 0;
+		}
 	}
 	else
 		tkerr(currentToken, "Missing ID");
