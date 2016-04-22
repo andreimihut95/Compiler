@@ -26,8 +26,11 @@ int unit()
 			break;
 	}
 	if (consume(END))
+	{
+		printf("-------------Nicio eroare de sintaxa!-------------\n");
 		return 1;
-	tkerr(currentToken, "Syntax error \n");
+	}
+	tkerr(currentToken, "-------------Declarare gresita structura/functie/variabila!-------------\n");
 }
 
 int declStruct()
@@ -42,19 +45,22 @@ int declStruct()
 			{
 				while (1)
 				{
-					if (declVar()) {}
-					else break;
+					if (declVar()) 
+					{}
+					else 
+						break;
 				}
-				if (consume(RACC)) {
+				if (consume(RACC)) 
+				{
 					if (consume(SEMICOLON))
 					{
 						return 1;
 					}
 					else
-						tkerr(currentToken, "missing ;\n");
+						tkerr(currentToken, "-------------Lipseste ;(SEMICOLON) dupa }(RACC)-------------\n");
 				}
 				else
-					tkerr(currentToken, "missing }\n");
+					tkerr(currentToken, "-------------Lipseste }(RACC)-------------\n");
 			}
 			else
 			{
@@ -63,7 +69,7 @@ int declStruct()
 			}
 		}
 		else
-			tkerr(currentToken, "missing ID");
+			tkerr(currentToken, "-------------Lipseste ID dupa struct-------------\n");
 	}
 	currentToken = startToken;
 	return 0;
@@ -86,7 +92,7 @@ int declVar()
 						arrayDecl();
 					}
 					else
-						tkerr(currentToken, "Missing ID after ,\n");
+						tkerr(currentToken, "-------------Lipseste ID(sau ID[parametru]) dupa ,(COMMA)-------------\n");
 				}
 				else break;
 			}
@@ -95,10 +101,10 @@ int declVar()
 				return 1;
 			}
 			else
-				tkerr(currentToken, "Missing ;\n");
+				tkerr(currentToken, "-------------Lipseste ;(SEMICOLON) dupa ID(sau ID[parametru])-------------\n");
 		}
 		else
-			tkerr(currentToken, "Missing ID\n");
+			tkerr(currentToken, "-------------Lipseste ID dupa typeBase(int,char,...)-------------\n");
 	}
 	currentToken = startToken;
 	return 0;
@@ -108,15 +114,7 @@ int typeBase()
 {
 
 	Token *startToken = currentToken;
-	if (consume(INT))
-	{
-		return 1;
-	}
-	if (consume(DOUBLE))
-	{
-		return 1;
-	}
-	if (consume(CHAR))
+	if (consume(INT) || consume(DOUBLE) || consume(CHAR))
 	{
 		return 1;
 	}
@@ -127,7 +125,7 @@ int typeBase()
 			return 1;
 		}
 		else
-			tkerr(currentToken, "ID expected\n");
+			tkerr(currentToken, "-------------Lipseste  ID dupa struct-------------\n");
 	}
 	currentToken = startToken;
 	return 0;
@@ -144,7 +142,7 @@ int arrayDecl()
 			return 1;
 		}
 		else
-			tkerr(currentToken, "Missing ] after expression\n");
+			tkerr(currentToken, "-------------Lipseste ](RBRACKET) dupa expresie-------------\n");
 	}
 	currentToken = startToken;
 	return 0;
@@ -179,7 +177,7 @@ int declFuncHeader()
 						{
 						}
 						else
-							tkerr(currentToken, "Invalid declaration!\n");
+							tkerr(currentToken, "-------------Lipseste argument de functie dupa ,(COMMA)!-------------\n");
 					}
 					else
 						break;
@@ -192,10 +190,10 @@ int declFuncHeader()
 					return 1;
 				}
 				else
-					tkerr(currentToken, "Missing stmCompound\n");
+					tkerr(currentToken, "-------------Lipseste {(LACC) dupa )(RPAR)-------------\n");
 			}
 			else
-				tkerr(currentToken, "Missing )\n");
+				tkerr(currentToken, "------------- Lipseste )(RPAR) dupa argument de functie-------------\n");
 		}
 		else
 		{
@@ -239,7 +237,7 @@ int funcArg()
 			arrayDecl();
 			return 1;
 		}
-		else tkerr(currentToken, "Missing Id\n");
+		else tkerr(currentToken, "-------------Lipseste ID(sau ID[parametru]) dupa typeBase(int,char,...)-------------\n");
 	}
 	return 0;
 
@@ -262,7 +260,7 @@ int stmCompound()
 		if (consume(RACC))
 			return 1;
 		else
-			tkerr(currentToken, "Missing }");
+			tkerr(currentToken, "-------------Lipseste }(RACC) dupa {(LACC), declarari variabile sau statement-------------");
 	}
 	currentToken = startToken;
 	return 0;
@@ -293,19 +291,19 @@ int stm()
 								return 1;
 							}
 							else
-								tkerr(currentToken, "Missing stm after else!\n");
+								tkerr(currentToken, "-------------Lipseste statement dupa else-------------\n");
 						}
 						return 1;
 					}
 				}
 				else
-					tkerr(currentToken, "Missing ) after expression\n");
+					tkerr(currentToken, "-------------Lipseste )(RPAR) dupa expresie-------------\n");
 			}
 			else
-				tkerr(currentToken, "Missing expression\n");
+				tkerr(currentToken, "-------------Lipseste expresia din if-------------\n");
 		}
 		else
-			tkerr(currentToken, "Missing lpar");
+			tkerr(currentToken, "-------------Lipseste ( (LPAR) dupa if-------------\n");
 
 	}
 	if (consume(WHILE))

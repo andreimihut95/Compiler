@@ -4,7 +4,7 @@
 int main()
 {
 	int n = 0; char c;
-	f = fopen("9.txt", "r");
+	f = fopen("fisier.txt", "r");
 	if (f == NULL)
 		err("Eroare la fisier!");
 	while ((c = fgetc(f)) != EOF)
@@ -17,6 +17,6 @@ int main()
 	showAtoms();
 	currentToken = tokens;
 	unit();
-	terminare();
+	//terminare();
 	return 0;
 }
