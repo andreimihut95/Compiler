@@ -487,6 +487,8 @@ int getNextToken()
 				tk = addTk(VOID);
 			else if (lungime == 5 && !memcmp(pointer_inceput, "while", 5))
 				tk = addTk(WHILE);
+			else if (lungime == 5 && !memcmp(pointer_inceput, "break", 5))
+				tk = addTk(BREAK);
 			else
 			{
 				int lungime = pointer_urmator - pointer_inceput;

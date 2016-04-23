@@ -260,7 +260,7 @@ int stmCompound()
 		if (consume(RACC))
 			return 1;
 		else
-			tkerr(currentToken, "-------------Lipseste }(RACC) dupa {(LACC), declarari variabile sau statement-------------");
+			tkerr(currentToken, "-------------Lipseste }(RACC) dupa {(LACC), declarari variabile sau statement-------------\n");
 	}
 	currentToken = startToken;
 	return 0;
@@ -295,6 +295,8 @@ int stm()
 						}
 						return 1;
 					}
+					else
+						tkerr(currentToken, "-------------Lipseste {(LACC) dupa )(RPAR)-------------\n");
 				}
 				else
 					tkerr(currentToken, "-------------Lipseste )(RPAR) dupa expresie-------------\n");
@@ -318,15 +320,17 @@ int stm()
 					{
 						return 1;
 					}
+					else
+						tkerr(currentToken, "-------------Lipseste {(LACC) dupa )(RPAR)-------------\n");
 				}
 				else
-					tkerr(currentToken, "Mising ) after expression\n");
+					tkerr(currentToken, "-------------Lipseste )(RPAR) dupa expresie-------------\n");
 			}
 			else
-				tkerr(currentToken, "Missing expression after (\n");
+				tkerr(currentToken, "-------------Lipseste expresie dupa ( (LPAR)-------------\n");
 		}
 		else
-			tkerr(currentToken, "Missing (\n");
+			tkerr(currentToken, "------------- Lipseste ( (LPAR) dupa while-------------\n");
 	}
 
 	if (consume(FOR))
@@ -347,19 +351,19 @@ int stm()
 							return 1;
 						}
 						else
-							tkerr(currentToken, "Missing stm\n");
+							tkerr(currentToken, "-------------Lipseste {(LACC) dupa )(RPAR)-------------\n");
 					}
 					else
-						tkerr(currentToken, "Missing ) after expression\n");
+						tkerr(currentToken, "-------------Lipseste )(RPAR) dupa expresie sau ;(SEMICOLON)-------------\n");
 				}
 				else
-					tkerr(currentToken, "Missing ; after expression\n");
+					tkerr(currentToken, "-------------Lipseste ;(SEMICOLON) dupa expresie sau ;(SEMICOLON)-------------\n");
 			}
 			else
-				tkerr(currentToken, "Missing ; after expression\n");
+				tkerr(currentToken, "-------------Lipseste ;(SEMICOLON) dupa expresie sau ( (LPAR)\n");
 		}
 		else
-			tkerr(currentToken, "Missing ( after expression\n");
+			tkerr(currentToken, "-------------Lipseste ( (LPAR) dupa for-------------\n");
 	}
 
 	if (consume(BREAK))
@@ -369,7 +373,7 @@ int stm()
 			return 1;
 		}
 		else
-			tkerr(currentToken, "Missing ; after break\n");
+			tkerr(currentToken, "-------------Lipseste ;(SEMICOLON) dupa break\n");
 	}
 
 	if (consume(RETURN))
@@ -380,7 +384,7 @@ int stm()
 			return 1;
 		}
 		else
-			tkerr(currentToken, "Missing ; after return\n");
+			tkerr(currentToken, "-------------Lipseste ;(SEMICOLON) dupa expresie sau return\n");
 	}
 
 	if (expr())
@@ -390,7 +394,7 @@ int stm()
 			return 1;
 		}
 		else
-			tkerr(currentToken, "Missing ; after expression\n");
+			tkerr(currentToken, "-------------Lipseste ;(SEMICOLON) dupa expresie-------------\n");
 	}
 
 	if (consume(SEMICOLON))
@@ -451,11 +455,9 @@ int exprOr1()
 			{
 				return 1;
 			}
-			else
-				tkerr(currentToken, "Missing expOr1\n");
 		}
 		else
-			tkerr(currentToken, "Missing exprand\n");
+			tkerr(currentToken, "-------------Lipseste expresieAND dupa ||(OR)-------------\n");
 	}
 	currentToken = startToken;
 	return 1;
@@ -482,11 +484,9 @@ int exprAnd1()
 			{
 				return 1;
 			}
-			else
-				tkerr(currentToken, "Missing exprAnd1\n");
 		}
 		else
-			tkerr(currentToken, "Missing exprEq\n");
+			tkerr(currentToken, "-------------Lipseste exprEQ dupa &&(AND)-------------\n");
 	}
 	currentToken = startToken;
 	return 1;
@@ -512,10 +512,8 @@ int exprEq1()
 		{
 			if (exprEq1())
 				return 1;
-			else
-				tkerr(currentToken, "Missing exprEq1\n");
 		}
-		else tkerr(currentToken, "Incomplete Equal expression");
+		else tkerr(currentToken, "-------------Lipseste exprREL dupa ==(EQUAL) sau !=(NOTEQ)-------------\n");
 	}
 	currentToken = startToken;
 	return 1;
@@ -541,11 +539,9 @@ int exprRel1()
 		{
 			if (exprRel1())
 				return 1;
-			else
-				tkerr(currentToken, "Missing exprRelPrim\n");
 		}
 		else
-			tkerr(currentToken, "Incomplete Rel expression");
+			tkerr(currentToken, "-------------Lipseste exprADD dupa LESS(<), LESSEQ(<=), GREATER(>) sau GREATEREQ(>=)-------------\n");
 	}
 	currentToken = startToken;
 	return 1;
@@ -570,10 +566,8 @@ int exprAdd1()
 		{
 			if (exprAdd1())
 				return 1;
-			else
-				tkerr(currentToken, "Missing exprAdd1\n");
 		}
-		else tkerr(currentToken, "Incomplete Add expression\n");
+		else tkerr(currentToken, "-------------Lipseste exprMUL dupa +(ADD) sau -(SUB)-------------\n");
 	}
 	currentToken = startToken;
 	return 1;
@@ -598,9 +592,9 @@ int exprMul1()
 		{
 			if (exprMul1())
 				return 1;
-			tkerr(currentToken, "Missing exprMul1\n");
 		}
-		else tkerr(currentToken, "Incomplete Mul expression");
+		else 
+			tkerr(currentToken, "-------------Lipseste exprCAST dupa *(MUL) sau /(DIV)-------------\n");
 	}
 	currentToken = startToken;
 	return 1;
@@ -620,13 +614,13 @@ int exprCast()
 					return 1;
 				}
 				else
-					tkerr(currentToken, "Missing exprCast\n");
+					tkerr(currentToken, "-------------Lipseste exprCAST dupa RPAR-------------\n");
 			}
 			else
-				tkerr(currentToken, "Missing )\n");
+				tkerr(currentToken, "-------------Lipseste )(RPAR) dupa typeName-------------\n");
 		}
 		else
-			tkerr(currentToken, "Missing typeName\n");
+			tkerr(currentToken, "-------------Lipseste typeName dupa ( (LPAR)-------------\n");
 	}
 	if (exprUnary())
 		return 1;
@@ -644,7 +638,7 @@ int exprUnary()
 			return 1;
 		}
 		else
-			tkerr(currentToken, "Missing exprUnary\n");
+			tkerr(currentToken, "-------------Lipseste exprUNARY dupa !(NOT) sau -(SUBSTRACT)-------------\n");
 	}
 	if (exprPostfix())
 		return 1;
@@ -675,14 +669,12 @@ int exprPostfix1()
 				{
 					return 1;
 				}
-				else
-					tkerr(currentToken, "Missing exprPostfix1\n");
 			}
 			else
-				tkerr(currentToken, "Missing )\n");
+				tkerr(currentToken, "-------------Lipseste ](RBRACKET) dupa expresie-------------\n");
 		}
 		else
-			tkerr(currentToken, "Missing expr\n");
+			tkerr(currentToken, "-------------Lipseste expresie dupa [(LBRACKET)-------------\n");
 	}
 	if (consume(DOT))
 	{
@@ -692,11 +684,9 @@ int exprPostfix1()
 			{
 				return 1;
 			}
-			else
-				tkerr(currentToken, "Missing exprPostfix1\n");
 		}
 		else
-			tkerr(currentToken, "Missing ID\n");
+			tkerr(currentToken, "-------------Lipseste ID dupa .(DOT)-------------\n");
 	}
 	currentToken = startToken;
 	return 1;
@@ -719,7 +709,7 @@ int exprPrimary()
 						{
 						}
 						else
-							tkerr(currentToken, "Missing expr after , \n");
+							tkerr(currentToken, "-------------Lipseste expresie dupa ,(COMMA)-------------\n");
 					}
 					else break;
 				}
@@ -730,7 +720,7 @@ int exprPrimary()
 				return 1;
 			}
 			else
-				tkerr(currentToken, "Missing RPAR\n");
+				tkerr(currentToken, "-------------Lipseste )(RPAR) dupa expresie-------------\n");
 		}
 		return 1;
 	}
@@ -748,9 +738,9 @@ int exprPrimary()
 				return 1;
 			}
 			else
-				tkerr(currentToken, "RPAR is expected");
+				tkerr(currentToken, "-------------Lipseste )(RPAR) dupa expresie-------------\n");
 		}
-		tkerr(currentToken, "Expression is missing\n");
+		tkerr(currentToken, "-------------Lipseste expresie dupa ( (LPAR)-------------\n");
 	}
 	currentToken = startToken;
 	return 0;
