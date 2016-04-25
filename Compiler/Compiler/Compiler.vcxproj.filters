@@ -34,5 +34,26 @@
     <Text Include="8.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="1.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="3.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="4.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="5.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="6.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="7.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
