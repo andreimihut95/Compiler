@@ -25,14 +25,19 @@ int unit()
 
 int declStruct()
 {
-
+	Token *tkName;
 	Token *startToken = currentToken;
 	if (consume(STRUCT))
 	{
+		tkName = currentToken;
 		if (consume(ID))
 		{
 			if (consume(LACC))
 			{
+				if (findSymbol(&symbols, tkName->text))
+					tkerr(currentToken, "symbol redefinition: %s", tkName->text);
+				currentStruct = addSymbol(&symbols, tkName->text, CLS_STRUCT);
+				initSymbols(&currentStruct->members);
 				while (1)
 				{
 					if (declVar()) 
@@ -44,6 +49,7 @@ int declStruct()
 				{
 					if (consume(SEMICOLON))
 					{
+						currentStruct = NULL;
 						return 1;
 					}
 					else
@@ -100,18 +106,36 @@ int declVar()
 	return 0;
 }
 
-int typeBase()
+int typeBase(Type *t)
 {
 
 	Token *startToken = currentToken;
-	if (consume(INT) || consume(DOUBLE) || consume(CHAR))
+	Token *tkName;
+	if (consume(INT))
 	{
+		t->typeBase = TB_INT;
+		return 1;
+	}
+	if (consume(DOUBLE))
+	{
+		t->typeBase = TB_DOUBLE;
+		return 1;
+	}
+	if (consume(CHAR))
+	{
+		t->typeBase = TB_CHAR;
 		return 1;
 	}
 	if (consume(STRUCT))
 	{
+		tkName = currentToken;
 		if (consume(ID))
 		{
+			Symbol      *s = findSymbol(&symbols, tkName->text);
+			if (s == NULL)tkerr(currentToken, "undefined symbol: %s", tkName->text);
+			if (s->cls != CLS_STRUCT)tkerr(currentToken, "%s is not a struct", tkName->text);
+			t->typeBase = TB_STRUCT;
+			t->s = s;
 			return 1;
 		}
 		else

@@ -15,8 +15,14 @@ int main()
 		getNextToken();
 	while (lastToken->code != END);
 	showAtoms();
+	initSymbols(&symbols);
 	currentToken = tokens;
 	unit();
+	//addSymbol(&symbols, "aaa", 1);
+	//addSymbol(&symbols, "bbb", 1);
+	//addSymbol(&symbols, "cc", 1);
+	afisareSymbols(&symbols);
 	//terminare();
+	
 	return 0;
 }
