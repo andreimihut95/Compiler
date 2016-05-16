@@ -310,7 +310,7 @@ int funcArg()
 int stmCompound()
 {
 	Token *startToken = currentToken;
-	Symbol *start = symbols.end[-1];
+	int n = symbols.end-symbols.begin;//aici s-a schimbat ca ii ceva eroare de la prof in laborator
 	if (consume(LACC))
 	{ 
 		crtDepth++;
@@ -326,7 +326,7 @@ int stmCompound()
 		if (consume(RACC))
 		{
 			crtDepth--;
-			deleteSymbolsAfter(&symbols, start);
+			deleteSymbolsAfter(&symbols, symbols.begin+n-1);//redimensionare
 			return 1;
 		}
 		else

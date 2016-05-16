@@ -145,7 +145,7 @@ void deleteSymbolsAfter(Symbols *symbols, Symbol *symbol)
 		if (strcmp(name, (*p) ->name) == 0)
 		{
 			for (r = p + 1; r != symbols->end; r++)
-				free(r);
+				free(*r);
 			symbols->end = p + 1;
 			break;
 		}
