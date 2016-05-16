@@ -27,26 +27,20 @@ typedef struct _Token Token;
 void err(const char *fmt, ...);
 void tkerr(const Token *tk, const char *fmt, ...);
 
-struct _Symbol;
-typedef struct _Symbol Symbol;
-struct _Symbols;
-typedef struct _Symbols Symbols;
+
+
 struct _Type;
 typedef struct _Type Type;
 
-typedef struct _Symbol
+struct _Symbol;
+typedef struct _Symbol Symbol;
+
+typedef struct _Type
 {
-	const char *name; 
-	int cls;
-	int mem;
-	Type *type;
-	int depth;
-	union
-	{
-		Symbols *args;
-		Symbols *members;
-	};
-}Symbol;
+	int typeBase;
+	Symbol *s;
+	int nElements;
+}Type;
 
 typedef struct _Symbols
 {
@@ -55,12 +49,20 @@ typedef struct _Symbols
 	Symbol **after;
 }Symbols;
 
-typedef struct _Type
+typedef struct _Symbol
 {
-	int typeBase;
-	Symbol *s;
-	int nElements;
-}Type;
+	const char *name; 
+	int cls;
+	int mem;
+	Type type;
+	int depth;
+	union
+	{
+		Symbols *args;
+		Symbols *members;
+	};
+}Symbol;
+
 char name[][13] = { "INT" , "CHAR" , "FLOAT" , "DOUBLE" , "ENUM" , "IF" ,"ELSE" , "BREAK" , "FOR" ,"STRUCT" , "VOID" ,
 					"WHILE" , "RETURN" , "DO" , "CONTINUE" , "SWITCH" , "CASE" , "LONG" , "ID" , "CT_INT" , "CT_REAL" , 
 				    "CT_CHAR" , "CT_STRING" , "COMMA" , "SEMICOLON" , "LPAR" , "RPAR" , "LBRACKET" , "RBRACKET" , "LACC" , 
@@ -85,7 +87,7 @@ typedef struct _Token
 
 int crtDepth;
 Token *lastToken = NULL, *tokens = NULL, *consumedToken = NULL, *currentToken = NULL;//pointers inceput, final, consumat si curent
-//Symbols symbols;
+Symbols symbols;
 
 int consume(int code)
 {
@@ -128,10 +130,26 @@ Symbol *findSymbol(Symbols *symbols, const char *name)
 {
 	Symbol **p;
 	if (symbols->begin == NULL)	return NULL;
-	for(p = symbols->end - 1; p != symbols->begin ; p--)
+	for(p = symbols->end - 1; p >= symbols->begin ; p--)
 		if (strcmp(name, (*p)->name) == 0)
 			return *p;
 	return NULL;
+}
+void deleteSymbolsAfter(Symbols *symbols, Symbol *symbol)
+{
+	char *name = symbol->name;
+	Symbol **p;
+	Symbol **r;
+	for (p = symbols->begin; p != symbols->end; p++)
+	{
+		if (strcmp(name, (*p) ->name) == 0)
+		{
+			for (r = p + 1; r != symbols->end; r++)
+				free(r);
+			symbols->end = p + 1;
+			break;
+		}
+	}
 }
 void afisareSymbols(Symbols *symbols)
 {
@@ -169,7 +187,6 @@ void tkerr(const Token *tk, const char *fmt, ...)
 Symbols symbols;
 Symbol *currentStruct;
 Symbol *currentFunction;
-Type *t;
 void        addVar(Token *tkName, Type *t)
 {
 	Symbol      *s;
@@ -191,6 +208,6 @@ void        addVar(Token *tkName, Type *t)
 		s = addSymbol(&symbols, tkName->text, CLS_VAR);
 		s->mem = MEM_GLOBAL;
 	}
-	s->type = &t;
+	s->type = *t;
 }
 #endif

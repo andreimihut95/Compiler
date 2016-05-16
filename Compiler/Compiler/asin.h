@@ -35,7 +35,7 @@ int declStruct()
 			if (consume(LACC))
 			{
 				if (findSymbol(&symbols, tkName->text))
-					tkerr(currentToken, "symbol redefinition: %s", tkName->text);
+					tkerr(currentToken, "Symbol redefinition: %s", tkName->text);
 				currentStruct = addSymbol(&symbols, tkName->text, CLS_STRUCT);
 				initSymbols(&currentStruct->members);
 				while (1)
@@ -74,18 +74,31 @@ int declStruct()
 int declVar()
 {
 	Token *startToken = currentToken;
-	if (typeBase())
+	Token *tkname;
+	Type t;
+	if (typeBase(&t))
 	{
+		tkname = currentToken;
 		if (consume(ID))
 		{
-			arrayDecl();
+			if(arrayDecl(&t))
+			{}
+			else 
+				t.nElements = -1;
+			addVar(tkname, &t);
 			while (1)
 			{
 				if (consume(COMMA))
 				{
+					tkname = currentToken;
 					if (consume(ID))
 					{
-						arrayDecl();
+						if (arrayDecl(&t))
+						{
+						}
+						else
+							t.nElements = -1;
+						addVar(tkname, &t);
 					}
 					else
 						tkerr(currentToken, "-------------Lipseste ID(sau ID[parametru]) dupa ,(COMMA)-------------\n");
@@ -106,24 +119,23 @@ int declVar()
 	return 0;
 }
 
-int typeBase(Type *t)
+int typeBase(Type *ret)
 {
-
 	Token *startToken = currentToken;
 	Token *tkName;
 	if (consume(INT))
 	{
-		t->typeBase = TB_INT;
+		ret->typeBase = TB_INT;
 		return 1;
 	}
 	if (consume(DOUBLE))
 	{
-		t->typeBase = TB_DOUBLE;
+		ret->typeBase = TB_DOUBLE;
 		return 1;
 	}
 	if (consume(CHAR))
 	{
-		t->typeBase = TB_CHAR;
+		ret->typeBase = TB_CHAR;
 		return 1;
 	}
 	if (consume(STRUCT))
@@ -132,10 +144,10 @@ int typeBase(Type *t)
 		if (consume(ID))
 		{
 			Symbol      *s = findSymbol(&symbols, tkName->text);
-			if (s == NULL)tkerr(currentToken, "undefined symbol: %s", tkName->text);
+			if (s == NULL)	tkerr(currentToken, "Undefined symbol: %s", tkName->text);
 			if (s->cls != CLS_STRUCT)tkerr(currentToken, "%s is not a struct", tkName->text);
-			t->typeBase = TB_STRUCT;
-			t->s = s;
+			ret->typeBase = TB_STRUCT;
+			ret->s = s;
 			return 1;
 		}
 		else
@@ -145,12 +157,13 @@ int typeBase(Type *t)
 	return 0;
 }
 
-int arrayDecl()
+int arrayDecl(Type *ret)
 {
 	Token *startToken = currentToken;
 	if (consume(LBRACKET))
 	{
 		expr();
+		ret->nElements = 0;
 		if (consume(RBRACKET))
 		{
 			return 1;
@@ -163,24 +176,36 @@ int arrayDecl()
 
 }
 
-int typeName()
+int typeName(Type *ret)
 {
-	if (typeBase())
+	if (typeBase(ret))
 	{
-		arrayDecl();
+		if (arrayDecl(ret))
+		{
+
+		}
+		else
+			ret->nElements = -1;
 		return 1;
 	}
 	return 0;
 }
 
-int declFuncHeader()
+int declFuncHeader(Type *t)
 {
 	Token *startToken = currentToken;
-
+	Token *tkName;
+	tkName = currentToken;
 	if (consume(ID))
 	{
 		if (consume(LPAR))
 		{
+			if (findSymbol(&symbols, tkName->text))
+				tkerr(currentToken, "Symbol redefinition: %s", tkName->text);
+			currentFunction = addSymbol(&symbols, tkName->text, CLS_FUNC);
+			initSymbols(&currentFunction->args);
+			currentFunction->type = *t;
+			crtDepth++;
 			if (funcArg())
 			{
 				while (1)
@@ -199,8 +224,11 @@ int declFuncHeader()
 			}
 			if (consume(RPAR))
 			{
+				crtDepth--;
 				if (stmCompound())
 				{
+					deleteSymbolsAfter(&symbols, currentFunction);
+					currentFunction = NULL;
 					return 1;
 				}
 				else
@@ -223,17 +251,25 @@ int declFuncHeader()
 int declFunc()
 {
 	Token *startToken = currentToken;
-	if (typeBase())
+	Type t;
+	if (typeBase(&t))
 	{
-		consume(MUL);
-		if (declFuncHeader())
+		if (consume(MUL))
+		{
+			t.nElements = 0;
+		}
+		else
+			t.nElements = -1;
+
+		if (declFuncHeader(&t))
 		{
 			return 1;
 		}
 	}
 	if (consume(VOID))
 	{
-		if (declFuncHeader())
+		t.typeBase = TB_VOID;
+		if (declFuncHeader(&t))
 		{
 			return 1;
 		}
@@ -244,11 +280,25 @@ int declFunc()
 
 int funcArg()
 {
-	if (typeBase())
+	Token * tkName;
+	Type t;
+	if (typeBase(&t))
 	{
+		tkName = currentToken;
 		if (consume(ID))
 		{
-			arrayDecl();
+			if (arrayDecl(&t))
+			{
+
+			}
+			else
+				t.nElements = -1;
+			Symbol  *s = addSymbol(&symbols, tkName->text, CLS_VAR);
+			s->mem = MEM_ARG;
+			s->type = t;
+			s = addSymbol(&currentFunction->args, tkName->text, CLS_VAR);
+			s->mem = MEM_ARG;
+			s->type = t;
 			return 1;
 		}
 		else tkerr(currentToken, "-------------Lipseste ID(sau ID[parametru]) dupa typeBase(int,char,...)-------------\n");
@@ -260,8 +310,10 @@ int funcArg()
 int stmCompound()
 {
 	Token *startToken = currentToken;
+	Symbol *start = symbols.end[-1];
 	if (consume(LACC))
 	{ 
+		crtDepth++;
 		while (1)
 		{
 			if (declVar())
@@ -272,7 +324,11 @@ int stmCompound()
 				break;
 		}
 		if (consume(RACC))
+		{
+			crtDepth--;
+			deleteSymbolsAfter(&symbols, start);
 			return 1;
+		}
 		else
 			tkerr(currentToken, "-------------Lipseste }(RACC) dupa {(LACC), declarari variabile sau statement-------------\n");
 	}
@@ -617,9 +673,10 @@ int exprMul1()
 int exprCast()
 {
 	Token *startToken = currentToken;
+	Type t;
 	if (consume(LPAR))
 	{
-		if (typeName())
+		if (typeName(&t))
 		{
 			if (consume(RPAR))
 			{

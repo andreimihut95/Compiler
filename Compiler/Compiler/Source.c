@@ -17,10 +17,11 @@ int main()
 	showAtoms();
 	initSymbols(&symbols);
 	currentToken = tokens;
-	unit();
-	//addSymbol(&symbols, "aaa", 1);
-	//addSymbol(&symbols, "bbb", 1);
-	//addSymbol(&symbols, "cc", 1);
+	//unit();
+	Symbol *s = addSymbol(&symbols, "aaa", 1);
+	addSymbol(&symbols, "bbb", 1);
+	addSymbol(&symbols, "cc", 1);
+	deleteSymbolsAfter(&symbols, s);
 	afisareSymbols(&symbols);
 	//terminare();
 	
