@@ -58,8 +58,8 @@ typedef struct _Symbol
 	int depth;
 	union
 	{
-		Symbols *args;
-		Symbols *members;
+		Symbols args;
+		Symbols members;
 	};
 }Symbol;
 
@@ -84,6 +84,17 @@ typedef struct _Token
 	int line; // linia din fisierul de intrare
 	struct _Token *next; // inlantuire la urmatorul AL
 }Token;
+typedef union {
+	long int i; // int, char
+	double d; // double
+	const char *str; // char[]
+}CtVal;
+typedef struct {
+	Type type; // type of the result
+	int isLVal; // if it is a LVal
+	int isCtVal; // if it is a constant value (int, real, char, char[])
+	CtVal ctVal; // the constat value
+}RetVal;
 
 int crtDepth;
 Token *lastToken = NULL, *tokens = NULL, *consumedToken = NULL, *currentToken = NULL;//pointers inceput, final, consumat si curent
@@ -163,6 +174,60 @@ void afisareSymbols(Symbols *symbols)
 		printf("%s ", (*p)->name);
 	printf("\n");
 }
+Symbol *addExtFunc(const char *name, Type type)
+{
+	Symbol *s = addSymbol(&symbols, name, CLS_EXTFUNC);
+	s->type = type;
+	initSymbols(&s->args);
+	return s;
+}
+Symbol *addFuncArg(Symbol *func, const char *name, Type type)
+{
+	Symbol *a = addSymbol(&func->args, name, CLS_VAR);
+	a->type = type;
+	return a;
+}
+Type getArithType(Type *s1, Type *s2)
+{
+	Type a;
+	return a;
+
+}
+void cast(Type *dst, Type *src)
+{
+	if (src->nElements>-1) {
+		if (dst->nElements>-1) {
+			if (src->typeBase != dst->typeBase)
+				tkerr(currentToken, "an array cannot be converted to an array of another type");
+		}
+		else {
+			tkerr(currentToken, "an array cannot be converted to a non-array");
+		}
+	}
+	else {
+		if (dst->nElements>-1) {
+			tkerr(currentToken, "a non-array cannot be converted to an array");
+		}
+	}
+	switch (src->typeBase) {
+	case TB_CHAR:
+	case TB_INT:
+	case TB_DOUBLE:
+			switch (dst->typeBase) {
+			case TB_CHAR:
+			case TB_INT:
+			case TB_DOUBLE:
+				return;
+			}
+	case TB_STRUCT:
+		if (dst->typeBase == TB_STRUCT) {
+			if (src->s != dst->s)
+				tkerr(currentToken, "a structure cannot be converted to another one");
+			return;
+		}
+	}
+	tkerr(currentToken, "incompatible types");
+}
 void err(const char *fmt, ...)
 {
 	va_list va;
@@ -209,5 +274,12 @@ void        addVar(Token *tkName, Type *t)
 		s->mem = MEM_GLOBAL;
 	}
 	s->type = *t;
+}
+Type createType(int typeBase, int nElements)
+{
+	Type t;
+	t.typeBase = typeBase;
+	t.nElements = nElements;
+	return t;
 }
 #endif
