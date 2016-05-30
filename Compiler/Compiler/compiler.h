@@ -312,6 +312,5 @@ void AddExtFunctions()
 	s = addExtFunc("put_c", createType(TB_VOID, -1));
 	addFuncArg(s, "c", createType(TB_CHAR, -1));
 	s = addExtFunc("get_c", createType(TB_CHAR, -1));
-	s = addExtFunc("double", createType(TB_DOUBLE, -1));
 }
 #endif

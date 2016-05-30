@@ -173,6 +173,7 @@ int arrayDecl(Type *ret)
 			ret->nElements = 0;
 		if (consume(RBRACKET))
 		{
+			//printf("%d\n", ret->nElements);
 			return 1;
 		}
 		else
@@ -866,7 +867,7 @@ int exprPrimary(RetVal *rv)
 {
 	Token *startToken = currentToken;
 	Token *tkName;
-	RetVal *arg;
+	RetVal arg;
 	if (consume(ID))
 	{
 		tkName = consumedToken;
@@ -880,19 +881,19 @@ int exprPrimary(RetVal *rv)
 			Symbol **crtDefArg = s->args.begin;
 			if (s->cls != CLS_FUNC&&s->cls != CLS_EXTFUNC)
 				tkerr(currentToken, "call of the non-function %s", tkName->text);
-			if (expr(arg))
+			if (expr(&arg))
 			{
 				if (crtDefArg == s->args.end)tkerr(currentToken, "too many arguments in call");
-				cast(&(*crtDefArg)->type, &arg->type);
+				cast(&(*crtDefArg)->type, &(&arg)->type);
 				crtDefArg++;
 				while (1)
 				{
 					if (consume(COMMA))
 					{
-						if (expr(arg))
+						if (expr(&arg))
 						{
 							if (crtDefArg == s->args.end)tkerr(currentToken, "too many arguments in call");
-							cast(&(*crtDefArg)->type, &arg->type);
+							cast(&(*crtDefArg)->type, &(&arg)->type);
 							crtDefArg++;
 						}
 						else
