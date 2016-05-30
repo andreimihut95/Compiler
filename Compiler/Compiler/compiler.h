@@ -187,11 +187,24 @@ Symbol *addFuncArg(Symbol *func, const char *name, Type type)
 	a->type = type;
 	return a;
 }
+int getPriority(Type *type)
+{
+	if (type->typeBase == TB_CHAR)
+		return 1;
+	if (type->typeBase == TB_INT)
+		return 2;
+	if (type->typeBase == TB_DOUBLE)
+		return 3;
+	return 0;
+}
 Type getArithType(Type *s1, Type *s2)
 {
-	Type a;
-	return a;
-
+	if (getPriority(s1) == 0 || getPriority(s2) == 0)
+		tkerr(currentToken, "Must be int, char or double");
+	int p1, p2;
+	p1 = getPriority(s1);
+	p2 = getPriority(s2);
+	return ((p1 > p2) ? *s1 : *s2);
 }
 void cast(Type *dst, Type *src)
 {
@@ -228,6 +241,7 @@ void cast(Type *dst, Type *src)
 	}
 	tkerr(currentToken, "incompatible types");
 }
+
 void err(const char *fmt, ...)
 {
 	va_list va;
@@ -281,5 +295,23 @@ Type createType(int typeBase, int nElements)
 	t.typeBase = typeBase;
 	t.nElements = nElements;
 	return t;
+}
+void AddExtFunctions()
+{
+	Symbol *s;
+	s = addExtFunc("put_s", createType(TB_VOID, -1));
+	addFuncArg(s, "s", createType(TB_CHAR, 0));
+	s = addExtFunc("get_s", createType(TB_VOID, -1));
+	addFuncArg(s, "s", createType(TB_CHAR, 0));
+	s = addExtFunc("put_i", createType(TB_VOID, -1));
+	addFuncArg(s, "i", createType(TB_INT, -1));
+	s = addExtFunc("get_i", createType(TB_INT, -1));
+	s = addExtFunc("put_d", createType(TB_VOID, -1));
+	addFuncArg(s, "d", createType(TB_DOUBLE, -1));
+	s = addExtFunc("get_d", createType(TB_DOUBLE, -1));
+	s = addExtFunc("put_c", createType(TB_VOID, -1));
+	addFuncArg(s, "c", createType(TB_CHAR, -1));
+	s = addExtFunc("get_c", createType(TB_CHAR, -1));
+	s = addExtFunc("double", createType(TB_DOUBLE, -1));
 }
 #endif

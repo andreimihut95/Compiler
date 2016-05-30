@@ -347,7 +347,7 @@ int stmCompound()
 int stm()
 {
 	Token *startToken = currentToken;
-	RetVal rv ,rv1 , rv2 ,rv3;
+	RetVal rv, rv1, rv2, rv3;
 	if (stmCompound())
 	{
 		return 1;
@@ -500,32 +500,31 @@ int expr(RetVal *rv)
 
 int exprAssign(RetVal *rv)
 {
-	if (exprOr(rv))
-	{
-		exprAssign1(rv);
-		return 1;
-	}
-	return 0;
-}
-int exprAssign1(RetVal *rv)
-{
 	Token *startToken = currentToken;
-	RetVal rve;
-	if (consume(ASSIGN))
+	RetVal  rve;
+	if (exprUnary(rv))
 	{
-		if (exprOr(&rve))
+		if (consume(ASSIGN))
 		{
-			if (!rv->isLVal)tkerr(currentToken, "cannot assign to a non-lval");
-			if (rv->type.nElements>-1 || rve.type.nElements>-1)
-				tkerr(currentToken, "the arrays cannot be assigned");
-			cast(&rv->type, &rve.type);
-			rv->isCtVal = rv->isLVal = 0;
-			if (exprAssign1(rv))
+			if (exprAssign(&rve))
+			{
+				if (!rv->isLVal)tkerr(currentToken, "cannot assign to a non-lval");
+				if (rv->type.nElements > -1 || rve.type.nElements > -1)
+					tkerr(currentToken, "the arrays cannot be assigned");
+				cast(&rv->type, &rve.type);
+				rv->isCtVal = rv->isLVal = 0;
 				return 1;
+			}
+			else
+				tkerr(currentToken, "Lipseste expresie dupa =");
 		}
+		//tkerr(currentToken, "Lipseste expresie dupa =");
+		
 	}
 	currentToken = startToken;
-	return 1;
+	if (exprOr(rv))
+		return 1;
+	return 0;
 }
 int exprOr(RetVal *rv)
 {
@@ -609,10 +608,11 @@ int exprEq(RetVal *rv)
 int exprEq1(RetVal *rv)
 {
 	Token *startToken = currentToken;
-	Token *tkop = currentToken;
+	Token *tkop;
 	RetVal rve;
 	if (consume(EQUAL) || consume(NOTEQ))
 	{
+		tkop = consumedToken;
 		if (exprRel(&rve))
 		{
 			if (rv->type.typeBase == TB_STRUCT || rve.type.typeBase == TB_STRUCT)
@@ -642,10 +642,11 @@ int exprRel(RetVal *rv)
 int exprRel1(RetVal *rv)
 {
 	Token *startToken = currentToken;
-	Token *tkop = currentToken;
+	Token *tkop;
 	RetVal rve;
 	if (consume(LESS) || consume(LESSEQ) || consume(GREATER) || consume(GREATEREQ))
 	{
+		tkop = consumedToken;
 		if (exprAdd(&rve))
 		{
 			if (rv->type.nElements>-1 || rve.type.nElements>-1)
@@ -677,17 +678,18 @@ int exprAdd(RetVal *rv)
 int exprAdd1(RetVal *rv)
 {
 	Token *startToken = currentToken;
-	Token *tkop = currentToken;
+	Token *tkop;
 	RetVal rve;
 	if (consume(ADD) || consume(SUB))
 	{
+		tkop = consumedToken;
 		if (exprMul(&rve))
 		{
 			if (rv->type.nElements>-1 || rve.type.nElements>-1)
 				tkerr(currentToken, "an array cannot be added or subtracted");
 			if (rv->type.typeBase == TB_STRUCT || rve.type.typeBase == TB_STRUCT)
 				tkerr(currentToken, "a structure cannot be added or subtracted");
-			//rv->type = getArithType(&rv->type, &rve.type);
+			rv->type = getArithType(&rv->type, &rve.type);
 			rv->isCtVal = rv->isLVal = 0;
 			if (exprAdd1(rv))
 				return 1;
@@ -711,17 +713,18 @@ int exprMul(RetVal *rv)
 int exprMul1(RetVal *rv)
 {
 	Token *startToken = currentToken;
-	Token *tkop = currentToken;
+	Token *tkop;
 	RetVal rve;
 	if (consume(MUL) || consume(DIV))
 	{
+		tkop = consumedToken;
 		if (exprCast(&rve))
 		{
 			if (rv->type.nElements>-1 || rve.type.nElements>-1)
 				tkerr(currentToken, "an array cannot be multiplied or divided");
 			if (rv->type.typeBase == TB_STRUCT || rve.type.typeBase == TB_STRUCT)
 				tkerr(currentToken, "a structure cannot be multiplied or divided");
-		//	rv->type = getArithType(&rv->type, &rve.type);
+			rv->type = getArithType(&rv->type, &rve.type);
 			rv->isCtVal = rv->isLVal = 0;
 			if (exprMul1(rv))
 				return 1;
@@ -760,18 +763,19 @@ int exprCast(RetVal *rv)
 		else
 			tkerr(currentToken, "-------------Lipseste typeName dupa ( (LPAR)-------------\n");
 	}
+	currentToken = startToken;
 	if (exprUnary(rv))
 		return 1;
-	currentToken = startToken;
 	return 0;
 }
 
 int exprUnary(RetVal *rv)
 {
-	Token *tkop = currentToken;
+	Token *tkop;
 	Token *startToken = currentToken;
 	if (consume(NOT) || consume(SUB))
 	{
+		tkop = consumedToken;
 		if (exprUnary(rv))
 		{
 			if (tkop->code == SUB) {
@@ -810,12 +814,13 @@ int exprPostfix1(RetVal *rv)
 	RetVal rve;
 	Token *startToken = currentToken;
 	Token *tkName;
+	Type typeInt;
 	if (consume(LBRACKET))
 	{
 		if (expr(&rve))
 		{
-			if (rv->type.nElements<0)tkerr(currentToken, "only an array can be indexed");
-			Type typeInt = createType(TB_INT, -1);
+			if (rv->type.nElements<0)	tkerr(currentToken, "only an array can be indexed");
+		    typeInt = createType(TB_INT, -1);
 			cast(&typeInt, &rve.type);
 			rv->type = rv->type;
 			rv->type.nElements = -1;
@@ -836,9 +841,9 @@ int exprPostfix1(RetVal *rv)
 	}
 	if (consume(DOT))
 	{
-		tkName = currentToken;
 		if (consume(ID))
 		{
+			tkName = consumedToken;
 			Symbol      *sStruct = rv->type.s;
 			Symbol      *sMember = findSymbol(&sStruct->members, tkName->text);
 			if (!sMember)
@@ -854,17 +859,17 @@ int exprPostfix1(RetVal *rv)
 		else
 			tkerr(currentToken, "-------------Lipseste ID dupa .(DOT)-------------\n");
 	}
-	currentToken = startToken;
 	return 1;
 }
 
 int exprPrimary(RetVal *rv)
 {
 	Token *startToken = currentToken;
-	Token *tkName = currentToken;
+	Token *tkName;
 	RetVal *arg;
 	if (consume(ID))
 	{
+		tkName = consumedToken;
 		Symbol *s = findSymbol(&symbols, tkName->text);
 		if (!s)tkerr(currentToken, "undefined symbol %s", tkName->text);
 		rv->type = s->type;
@@ -914,30 +919,30 @@ int exprPrimary(RetVal *rv)
 		return 1;
 	}
 	Token *tki, *tkr, *tkc, *tks;
-	tki = currentToken;
-	tkr = currentToken;
-	tkc = currentToken;
-	tks = currentToken;
 	if (consume(CT_INT))
 	{
+		tki = consumedToken;
 		rv->type = createType(TB_INT, -1); rv->ctVal.i = tki->i;
 		rv->isCtVal = 1; rv->isLVal = 0;
 		return 1;
 	}
 	else if (consume(CT_REAL))
 	{
+		tkr = consumedToken;
 		rv->type = createType(TB_DOUBLE, -1); rv->ctVal.d = tkr->r;
 		rv->isCtVal = 1; rv->isLVal = 0;
 		return 1;
 	}
 	else if (consume(CT_CHAR))
 	{
+		tkc = consumedToken;
 		rv->type = createType(TB_CHAR, -1); rv->ctVal.i = tkc->i;
 		rv->isCtVal = 1; rv->isLVal = 0;
 		return 1;
 	}
 	else if (consume(CT_STRING))
 	{
+		tks = consumedToken;
 		rv->type = createType(TB_CHAR, 0); rv->ctVal.str = tks->text;
 		rv->isCtVal = 1; rv->isLVal = 0;
 		return 1;

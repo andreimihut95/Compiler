@@ -15,6 +15,7 @@ int main()
 		getNextToken();
 	while (lastToken->code != END);
 	showAtoms();
+	AddExtFunctions();
 	initSymbols(&symbols);
 	currentToken = tokens;
 	unit();
